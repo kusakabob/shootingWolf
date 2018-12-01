@@ -4,6 +4,10 @@ var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 var round = 0;
 var roundFlag = true;
+var match = [];
+match[round] = [];
+var connectionCount = 0;
+
 
 app.use('/css',express.static(__dirname + '/css'));
 app.use('/js',express.static(__dirname + '/js'));
@@ -22,13 +26,12 @@ server.listen(process.env.PORT || 8081,function(){
 //array 
 /// if game already started , next connection.
 
+
 io.on('connection',function(socket){
     
     //max 4 players
 //if (getAllPlayers().length > 4) socket.disconnect();
-
-    socket.match = [];
-    socket.match[round] = [];
+    // console.log(getAllPlayers());
 
     socket.gameData = {
         start:false,
@@ -37,10 +40,8 @@ io.on('connection',function(socket){
         testText:"Game Over"
     }
 
-    if (roundFlag){
-    socket.match[round].push(socket.gameData);
-    roundFlag = false;
-    }
+    TODO:// roundFlag initialize after every 4 players
+    
     
     socket.on('start',function(){
         socket.gameData.start = true;
@@ -48,6 +49,9 @@ io.on('connection',function(socket){
     })
 
     socket.on('newplayer',function(){
+
+        connectionCount ++;
+
         socket.player = {
             id: server.lastPlayderID++,
             x: randomInt(100,400),                                                                                                                                                                                                                                                                                                                                                       
@@ -57,17 +61,27 @@ io.on('connection',function(socket){
             posNum:1,
             alive:true
         };
-       
-        socket.match[round].push(socket.player);
- 
-        console.log(socket.match);
+        if (connectionCount > 4) {
+            roundFlag = true;
+            round ++;
+            match[round] = [];
+            connectionCount = 1;
+        }
 
+        if (roundFlag){
+            console.log("roundy")
+            match[round].push(socket.gameData);
+            roundFlag = false;
+            }
+       
+        match[round].push(socket.player);
 
         //limit if (getAllPlayers().length <= 2){}
 
-        var posNum = getAllPlayers().length % 4;
-        if (posNum == 0) posNum = 4;
-        socket.player.posNum = posNum
+        socket.player.posNum = connectionCount;
+
+        console.log("socket.match",match);
+        console.log("////")
 
         socket.broadcast.emit('newplayer',socket.player);
         socket.emit('allplayers',getAllPlayers());
@@ -118,7 +132,7 @@ io.on('connection',function(socket){
 
 
         socket.on('disconnect',function(){
-            console.log(socket.player.id);
+            
             io.emit('remove',socket.player.id);
         });
     });
