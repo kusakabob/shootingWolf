@@ -49,9 +49,14 @@ Client.askMe = function(){
     Client.socket.emit("askme");
 }
 
+Client.askGameStarted = function(){
+    Client.socket.emit("start");
+}
+
 Client.socket.on('start',function(start){
     console.log("start!");
     Game.go = true;
+    Game.readyText.destroy();
 })
 
 Client.socket.on('newplayer',function(data){

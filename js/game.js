@@ -18,7 +18,6 @@ Game.create = function(){
     Game.spawnCounter = 1;
     //ctrl players
     Game.playerCount = 0;
-    Game.go = false;
    
 
     var map = game.add.tilemap('map');
@@ -44,8 +43,6 @@ Game.create = function(){
 
 
     Game.initBullets();// should be after maplayer; otherwise it go beneath
-    
-    TODO: //ask server
 
     Client.askNewPlayer();
     
@@ -62,8 +59,7 @@ Game.initBullets = function(){
 
 Game.addNewPlayer = function(id,x,y,posNum,hp,alive){
     
-    TODO:
-    // ask to server if started
+    
     if (Game.go) return;
 
     Game.idArray.push(id);
@@ -113,11 +109,6 @@ Game.addNewPlayer = function(id,x,y,posNum,hp,alive){
     Client.askMe();
 
     console.log(Game.playerMap);
-
-
-    TODO:
-    // until 4 players
-    // if (Game.idArray.length > 3){}
     
     //to not overwrite inputs
     if (!Game.layer.events.onInputDown._bindings){
@@ -159,8 +150,7 @@ Game.arrowCtrl = function(id){
         function(){
             
             Client.gameStart();
-            TODO:// ask server if game started?
-            Game.readyText.destroy();
+            
         }, this);
 
     pl.leftAr = false;

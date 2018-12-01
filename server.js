@@ -2,6 +2,8 @@ var express = require('express');
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
+var round = 0;
+var roundFlag = true;
 
 app.use('/css',express.static(__dirname + '/css'));
 app.use('/js',express.static(__dirname + '/js'));
@@ -18,14 +20,31 @@ server.listen(process.env.PORT || 8081,function(){
 });
 
 //array 
+/// if game already started , next connection.
 
 io.on('connection',function(socket){
+    
     //max 4 players
-if (getAllPlayers().length > 4) socket.disconnect();
+//if (getAllPlayers().length > 4) socket.disconnect();
+
+    socket.match = [];
+    socket.match[round] = [];
+
+    socket.gameData = {
+        start:false,
+        over: false,
+        day:false,
+        testText:"Game Over"
+    }
+
+    if (roundFlag){
+    socket.match[round].push(socket.gameData);
+    roundFlag = false;
+    }
     
     socket.on('start',function(){
-        socket.start = true;
-        io.emit('start',socket.start);
+        socket.gameData.start = true;
+        io.emit('start',socket.gameData.start);
     })
 
     socket.on('newplayer',function(){
@@ -38,14 +57,12 @@ if (getAllPlayers().length > 4) socket.disconnect();
             posNum:1,
             alive:true
         };
+       
+        socket.match[round].push(socket.player);
+ 
+        console.log(socket.match);
 
-        socket.gameData = {
-            start:false,
-            over: false,
-            hpbar:3,
-            day:false,
-            testText:"Game Over"
-        }
+
         //limit if (getAllPlayers().length <= 2){}
 
         var posNum = getAllPlayers().length % 4;
